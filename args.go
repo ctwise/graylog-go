@@ -63,8 +63,7 @@ func parseArgs() *options {
 	json := parser.Flag("j", "json", &argparse.Options{Required: false, Help: "Output messages in json format. Shows the modified log message, not the untouched message from Graylog. Useful in understanding the fields available when creating Format templates or for further processing."})
 	noColor := parser.Flag("", "no-colors", &argparse.Options{Required: false, Help: "Don't use colors in output."})
 
-	err := parser.Parse(os.Args)
-	if err != nil {
+	if err := parser.Parse(os.Args); err != nil {
 		invalidArgs(parser, err, "")
 	}
 	if len(*fields) > 0 && len(*start) == 0 {

@@ -70,8 +70,8 @@ func tryFormat(msg logMessage, tmplName string, tmpl string) string {
 	}
 	var t = template.Must(template.New(tmplName).Option("missingkey=error").Funcs(funcMap).Parse(tmpl))
 	var result bytes.Buffer
-	err := t.Execute(&result, msg.fields)
-	if err == nil {
+
+	if err := t.Execute(&result, msg.fields); err == nil {
 		return result.String()
 	} else {
 		return ""

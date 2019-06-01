@@ -190,8 +190,7 @@ func readCSV(uri string, username string, password string, ignoreCert bool) {
 	fmt.Println("Exporting...")
 	body := fetch(uri, username, password, ignoreCert, csvAcceptType)
 
-	err := ioutil.WriteFile("export.csv", body, 0644)
-	if err != nil {
+	if err := ioutil.WriteFile("export.csv", body, 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to write to file 'export.csv': %s", err.Error())
 	} else {
 		cwd, _ := os.Getwd()
