@@ -27,8 +27,7 @@ type FormatDefinition struct {
 func New(configPath string) (*IniFile, error) {
 	f, err := readConfig(configPath)
 	if err == nil {
-		var config = IniFile{ini: f}
-		return &config, nil
+		return &IniFile{ini: f}, nil
 	} else {
 		return nil, err
 	}
