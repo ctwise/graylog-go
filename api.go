@@ -40,9 +40,8 @@ type logMessage struct {
 }
 
 // Fetch all messages that match the settings in the options.
-func fetchMessages(opts *options) []logMessage {
+func fetchMessages(opts *options) (result []logMessage) {
 	api, export := messageApiUri(opts)
-	var result []logMessage
 	if export {
 		callGraylog(opts, api, csvAcceptType)
 	} else {
@@ -89,10 +88,7 @@ func fetchMessages(opts *options) []logMessage {
 }
 
 // Compute the API Uri to call. Determined by examing the command-line options.
-func messageApiUri(opts *options) (string, bool) {
-	var uri string
-	var export bool
-
+func messageApiUri(opts *options) (uri string, export bool) {
 	if opts.startDate == nil || opts.endDate == nil {
 		uri = fmt.Sprintf(relativeSearch, strconv.Itoa(opts.timeRange))
 	} else {

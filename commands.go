@@ -6,8 +6,7 @@ import (
 )
 
 // Converts a list of stream names into a list of stream ids.
-func findStreamIds(opts *options, streamNames string) []string {
-	var results []string
+func findStreamIds(opts *options, streamNames string) (results []string) {
 	names := strings.Split(streamNames, ",")
 	if len(names) > 0 {
 		allStreams := fetchStreams(opts)

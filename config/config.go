@@ -60,9 +60,7 @@ func (c *IniFile) IgnoreCert() bool {
 
 // Formats gets the log messages formats from the config file. Adds a final default format case so the user knows that
 // no formats were applied successfully.
-func (c *IniFile) Formats() []FormatDefinition {
-	var formats []FormatDefinition
-
+func (c *IniFile) Formats() (formats []FormatDefinition) {
 	for _, f := range c.ini.Section(formatsSection).Keys() {
 		formats = append(formats, FormatDefinition{Name: f.Name(), Format: f.Value()})
 	}
@@ -72,8 +70,8 @@ func (c *IniFile) Formats() []FormatDefinition {
 }
 
 // Reads the configuration file. The configuration is stored in a INI style file.
-func readConfig(configPath string) (*ini.File, error) {
-	configPath, err := filepath.Abs(configPath)
+func readConfig(configPath string) (cfg *ini.File, err error) {
+	configPath, err = filepath.Abs(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("configuration file not found at %s", configPath)
 	}
@@ -82,7 +80,7 @@ func readConfig(configPath string) (*ini.File, error) {
 		return nil, fmt.Errorf("configuration file not found or not readable at %s", configPath)
 	}
 
-	cfg, err := ini.Load(configPath)
+	cfg, err = ini.Load(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("configuration file cannot be parsed at %s", configPath)
 	}
