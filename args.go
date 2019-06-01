@@ -15,15 +15,17 @@ import (
 	"time"
 )
 
-// Limit used when no limit is provided by the user
+// DefaultLimit is the value used when no limit is provided by the user
 const DefaultLimit = 300
-// Range used when no range is provided by the user
+
+// DefaultRange is the value used when no range is provided by the user
 const DefaultRange = "2h"
-// Default location of the configuration path.
+
+// DefaultConfigPath is the default location of the configuration path.
 const DefaultConfigPath = "~/.graylog"
 
-// Stores the command-line options and values.
-type Options struct {
+// options structure stores the command-line options and values.
+type options struct {
 	listStreams  bool
 	application  string
 	query        string
@@ -36,13 +38,13 @@ type Options struct {
 	startDate    *time.Time
 	endDate      *time.Time
 	json         bool
-	serverConfig *config.ConfigFile
+	serverConfig *config.IniFile
 	noColor      bool
 }
 
-// Parse the command-line arguments.
-// returns: *Options which contains both the parsed command-line arguments.
-func ParseArgs() *Options {
+// parseArgs parses the command-line arguments.
+// returns: *options which contains both the parsed command-line arguments.
+func parseArgs() *options {
 	parser := argparse.NewParser("graylog", "Search and tail logs from Graylog.")
 
 	var defaultConfigPath = expandPath(DefaultConfigPath)
@@ -91,7 +93,7 @@ func ParseArgs() *Options {
 		query = &newQuery
 	}
 
-	options := Options{
+	options := options{
 		listStreams: *listStreams,
 		application: *application,
 		query:       *query,
@@ -193,12 +195,12 @@ func timeRangeToSeconds(parser *argparse.Parser, timeRange string) int {
 func invalidArgs(parser *argparse.Parser, err error, msg string) {
 	if len(msg) > 0 {
 		if err != nil {
-			fmt.Fprintf(os.Stderr,"%s: %s\n\n", msg, err.Error())
+			fmt.Fprintf(os.Stderr, "%s: %s\n\n", msg, err.Error())
 		} else {
-			fmt.Fprintf(os.Stderr,"%s\n\n", msg)
+			fmt.Fprintf(os.Stderr, "%s\n\n", msg)
 		}
 	} else if err != nil {
-		fmt.Fprintf(os.Stderr,"%s\n\n", err.Error())
+		fmt.Fprintf(os.Stderr, "%s\n\n", err.Error())
 	}
 	fmt.Fprintf(os.Stderr, parser.Usage(nil))
 	os.Exit(1)

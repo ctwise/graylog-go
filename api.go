@@ -27,6 +27,7 @@ const streamsInfo = "streams"
 // Stores recent log messages. Graylog doesn't have any methods for preventing duplicates or overlaps, so we have to
 // filter them out ourselves.
 var msgCache, _ = lru.New(1024)
+
 // Store the stream information so we don't have to pull it repeatedly.
 var streamCache map[string]map[string]string
 
@@ -39,7 +40,7 @@ type logMessage struct {
 }
 
 // Fetch all messages that match the settings in the options.
-func fetchMessages(options *Options) []logMessage {
+func fetchMessages(options *options) []logMessage {
 	api, export := messageApiUri(options)
 	var result []logMessage
 	if export {
@@ -88,7 +89,7 @@ func fetchMessages(options *Options) []logMessage {
 }
 
 // Compute the API Uri to call. Determined by examing the command-line options.
-func messageApiUri(options *Options) (string, bool) {
+func messageApiUri(options *options) (string, bool) {
 	var uri string
 	var export bool
 
@@ -128,7 +129,7 @@ func messageApiUri(options *Options) (string, bool) {
 }
 
 // Fetch the list of streams defined in Graylog.
-func fetchStreams(options *Options) map[string]map[string]string {
+func fetchStreams(options *options) map[string]map[string]string {
 	if len(streamCache) > 0 {
 		return streamCache
 	}
@@ -141,7 +142,7 @@ func fetchStreams(options *Options) map[string]map[string]string {
 	if len(slice) > 0 {
 		_, _ = jsonparser.ArrayEach(slice, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			if err != nil {
-				fmt.Fprintf(os.Stderr,"Unable to read array entry: %s\n", err.Error())
+				fmt.Fprintf(os.Stderr, "Unable to read array entry: %s\n", err.Error())
 			} else {
 				disabled := getJsonBool(value, "disabled")
 				id := getJsonString(value, "id")
@@ -160,7 +161,7 @@ func fetchStreams(options *Options) map[string]map[string]string {
 }
 
 // Common entry-point for calls to Graylog.
-func callGraylog(options *Options, api string, acceptType string) []byte {
+func callGraylog(options *options, api string, acceptType string) []byte {
 	cfg := options.serverConfig
 
 	uri := cfg.Uri()
@@ -191,7 +192,7 @@ func readCSV(uri string, username string, password string, ignoreCert bool) {
 
 	err := ioutil.WriteFile("export.csv", body, 0644)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"Unable to write to file 'export.csv': %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Unable to write to file 'export.csv': %s", err.Error())
 	} else {
 		cwd, _ := os.Getwd()
 		fmt.Println("Contents exported to " + cwd + "/export.csv")
@@ -212,7 +213,7 @@ func fetch(uri string, username string, password string, ignoreCert bool, accept
 
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"Request is malformed: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "Request is malformed: %s\n", err.Error())
 		os.Exit(1)
 	}
 	if len(username) > 0 && len(password) > 0 {
@@ -221,7 +222,7 @@ func fetch(uri string, username string, password string, ignoreCert bool, accept
 	req.Header.Add("Accept", acceptType)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"Unable to connect to Graylog: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "Unable to connect to Graylog: %s\n", err.Error())
 		os.Exit(1)
 	}
 	//noinspection GoUnhandledErrorResult
@@ -229,7 +230,7 @@ func fetch(uri string, username string, password string, ignoreCert bool, accept
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"Unable to read content from Graylog: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "Unable to read content from Graylog: %s\n", err.Error())
 		os.Exit(1)
 	}
 

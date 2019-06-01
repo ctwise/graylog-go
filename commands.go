@@ -6,7 +6,7 @@ import (
 )
 
 // Converts a list of stream names into a list of stream ids.
-func findStreamIds(options *Options, streamNames string) []string {
+func findStreamIds(options *options, streamNames string) []string {
 	var results []string
 	names := strings.Split(streamNames, ",")
 	if len(names) > 0 {
@@ -35,7 +35,7 @@ func commandListStreams(streams map[string]map[string]string) {
 	for _, v := range streams {
 		sts = append(sts, v)
 	}
-	sort.Slice(sts, func (i, j int) bool {
+	sort.Slice(sts, func(i, j int) bool {
 		iTitle := strings.ToLower(string(sts[i]["title"]))
 		jTitle := strings.ToLower(string(sts[j]["title"]))
 		return iTitle < jTitle
@@ -53,7 +53,7 @@ func commandListStreams(streams map[string]map[string]string) {
 }
 
 // Print out the log messages that match the search criteria.
-func commandListMessages(options *Options) []logMessage {
+func commandListMessages(options *options) []logMessage {
 	messages := fetchMessages(options)
 	streams := fetchStreams(options)
 	for _, msg := range messages {
@@ -62,4 +62,3 @@ func commandListMessages(options *Options) []logMessage {
 
 	return messages
 }
-

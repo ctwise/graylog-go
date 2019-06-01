@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-const DebugEsc = "\033[94m"
-const ErrorEsc = "\033[91m"
-const InfoEsc = "\033[92m"
-const ResetEsc = "\033[0;0m"
-const WarnEsc = "\033[93m"
+const debugEsc = "\033[94m"
+const errorEsc = "\033[91m"
+const infoEsc = "\033[92m"
+const resetEsc = "\033[0;0m"
+const warnEsc = "\033[93m"
 
-const BoldEsc = "\033[1m"
+const boldEsc = "\033[1m"
 
 const debugLevel = "DEBUG"
 const errorLevel = "ERROR"
@@ -28,11 +28,11 @@ const longTimeFormat = "2006-01-02T15:04:05.000Z"
 
 // Print a string in bold text.
 func printBoldText(text string) {
-	fmt.Println(BoldEsc + text + ResetEsc)
+	fmt.Println(boldEsc + text + resetEsc)
 }
 
 // Print a single log message
-func printMessage(options *Options, streamLookup map[string]map[string]string, msg logMessage) {
+func printMessage(options *options, streamLookup map[string]map[string]string, msg logMessage) {
 	adjustMessage(msg, streamLookup, options.noColor)
 
 	var text string
@@ -170,17 +170,17 @@ func computeLogLevelColor(level string, msg logMessage) {
 	var levelColor string
 	switch level {
 	case debugLevel, traceLevel:
-		levelColor = DebugEsc
+		levelColor = debugEsc
 	case infoLevel:
-		levelColor = InfoEsc
+		levelColor = infoEsc
 	case warnLevel:
-		levelColor = WarnEsc
+		levelColor = warnEsc
 	case errorLevel, fatalLevel:
-		levelColor = ErrorEsc
+		levelColor = errorEsc
 	}
 	if len(levelColor) > 0 {
 		msg.fields[levelColorField] = levelColor
-		msg.fields[resetField] = ResetEsc
+		msg.fields[resetField] = resetEsc
 	} else {
 		emptyLogLevelColor(msg)
 	}

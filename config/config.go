@@ -1,4 +1,5 @@
-// Wrapper for an INI configuration file.
+// Package config is a wrapper for an INI configuration file.
+// The package is domain-specific, not general purpose.
 package config
 
 import (
@@ -11,54 +12,56 @@ import (
 const formatsSection string = "formats"
 const serverSection string = "server"
 
-// Wrapper around the INI file reader
-type ConfigFile struct {
+// IniFile is a wrapper around the INI file reader
+type IniFile struct {
 	ini *ini.File
 }
 
+// FormatDefinition stores a single format line.
 type FormatDefinition struct {
 	Name   string
 	Format string
 }
 
-// Create a new INI file reader and wrap it.
-func New(configPath string) (*ConfigFile, error) {
+// New creates a new INI file reader and wraps it.
+func New(configPath string) (*IniFile, error) {
 	f, err := readConfig(configPath)
 	if err == nil {
-		var config = ConfigFile{ini: f}
+		var config = IniFile{ini: f}
 		return &config, nil
 	} else {
 		return nil, err
 	}
 }
 
-// Get the uri from the config file
-func (c *ConfigFile) Uri() string {
-	serverSection := c.ini.Section(serverSection)
-	return serverSection.Key("uri").String()
+// Uri gets the uri from the config file.
+func (c *IniFile) Uri() string {
+	server := c.ini.Section(serverSection)
+	return server.Key("uri").String()
 }
 
-// Get the username from the config file. Default to an empty string.
-func (c *ConfigFile) Username() string {
-	serverSection := c.ini.Section(serverSection)
-	return serverSection.Key("username").MustString("")
+// Username gets the username from the config file. Defaults to an empty string.
+func (c *IniFile) Username() string {
+	server := c.ini.Section(serverSection)
+	return server.Key("username").MustString("")
 }
 
-// Get the password from the config file. Default to an empty string.
-func (c *ConfigFile) Password() string {
-	serverSection := c.ini.Section(serverSection)
-	return serverSection.Key("password").MustString("")
+// Password gets the password from the config file. Defaults to an empty string.
+func (c *IniFile) Password() string {
+	server := c.ini.Section(serverSection)
+	return server.Key("password").MustString("")
 }
 
-// Get the ignoreCert value from the config file. Default to false.
-func (c *ConfigFile) IgnoreCert() bool {
-	serverSection := c.ini.Section(serverSection)
-	return serverSection.Key("ignoreCert").MustBool(false)
+// IgnoreCert gets the ignoreCert value from the config file. Defaults to false.
+func (c *IniFile) IgnoreCert() bool {
+	server := c.ini.Section(serverSection)
+	return server.Key("ignoreCert").MustBool(false)
 }
 
-// Get the formats from the config file. Adds a final default format just in case.
-func (c *ConfigFile) Formats() []FormatDefinition {
-	var formats = []FormatDefinition{}
+// Formats gets the log messages formats from the config file. Adds a final default format case so the user knows that
+// no formats were applied successfully.
+func (c *IniFile) Formats() []FormatDefinition {
+	var formats []FormatDefinition
 
 	for _, f := range c.ini.Section(formatsSection).Keys() {
 		formats = append(formats, FormatDefinition{Name: f.Name(), Format: f.Value()})
@@ -68,14 +71,14 @@ func (c *ConfigFile) Formats() []FormatDefinition {
 	return formats
 }
 
-// Read the configuration file. It's stored in a INI style.
+// Reads the configuration file. The configuration is stored in a INI style file.
 func readConfig(configPath string) (*ini.File, error) {
 	configPath, err := filepath.Abs(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("configuration file not found at %s", configPath)
 	}
 
-	if _, err := os.Stat(configPath); err != nil {
+	if _, err2 := os.Stat(configPath); err2 != nil {
 		return nil, fmt.Errorf("configuration file not found or not readable at %s", configPath)
 	}
 

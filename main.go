@@ -6,24 +6,26 @@ import (
 )
 
 // Minimum delay between calls to Graylog
-const MinDelay = 0.2
+const minDelay = 0.2
+
 // Maximum delay between calls to Graylog
-const MaxDelay = 30.0
+const maxDelay = 30.0
+
 // Back-off factor when increasing the delay.
-const DelayIncreaseFactor = 2.0
+const delayIncreaseFactor = 2.0
 
 // Adjust the delay between calls to Graylog so we don't hammer it when no messages have
 // arrived for a while.
 func adjustDelay(delay float64, messages []logMessage) float64 {
 	if len(messages) == 0 {
-		if delay < MaxDelay {
-			delay *= DelayIncreaseFactor
-			if delay > MaxDelay {
-				delay = MaxDelay
+		if delay < maxDelay {
+			delay *= delayIncreaseFactor
+			if delay > maxDelay {
+				delay = maxDelay
 			}
 		}
 	} else {
-		delay = MinDelay
+		delay = minDelay
 	}
 	return delay
 }
@@ -35,7 +37,7 @@ func sleep(delay float64) {
 }
 
 func main() {
-	options := ParseArgs()
+	options := parseArgs()
 
 	if options.listStreams {
 		streams := fetchStreams(options)
@@ -46,7 +48,7 @@ func main() {
 	if !options.tail {
 		commandListMessages(options)
 	} else {
-		var delay = MinDelay
+		var delay = minDelay
 
 		//noinspection GoInfiniteFor
 		for {
@@ -58,5 +60,3 @@ func main() {
 		}
 	}
 }
-
-
