@@ -37,22 +37,22 @@ func sleep(delay float64) {
 }
 
 func main() {
-	options := parseArgs()
+	opts := parseArgs()
 
-	if options.listStreams {
-		streams := fetchStreams(options)
+	if opts.listStreams {
+		streams := fetchStreams(opts)
 		commandListStreams(streams)
 		os.Exit(0)
 	}
 
-	if !options.tail {
-		commandListMessages(options)
+	if !opts.tail {
+		commandListMessages(opts)
 	} else {
 		var delay = minDelay
 
 		//noinspection GoInfiniteFor
 		for {
-			messages := commandListMessages(options)
+			messages := commandListMessages(opts)
 
 			sleep(delay)
 

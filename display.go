@@ -32,16 +32,16 @@ func printBoldText(text string) {
 }
 
 // Print a single log message
-func printMessage(options *options, streamLookup map[string]map[string]string, msg logMessage) {
-	adjustMessage(msg, streamLookup, options.noColor)
+func printMessage(opts *options, streamLookup map[string]map[string]string, msg logMessage) {
+	adjustMessage(msg, streamLookup, opts.noColor)
 
 	var text string
 
-	if options.json {
+	if opts.json {
 		buf, _ := json.Marshal(msg.fields)
 		text = string(buf)
 	} else {
-		for _, f := range options.serverConfig.Formats() {
+		for _, f := range opts.serverConfig.Formats() {
 			text = tryFormat(msg, f.Name, f.Format)
 			if len(text) > 0 {
 				break

@@ -6,11 +6,11 @@ import (
 )
 
 // Converts a list of stream names into a list of stream ids.
-func findStreamIds(options *options, streamNames string) []string {
+func findStreamIds(opts *options, streamNames string) []string {
 	var results []string
 	names := strings.Split(streamNames, ",")
 	if len(names) > 0 {
-		allStreams := fetchStreams(options)
+		allStreams := fetchStreams(opts)
 		for _, name := range names {
 			var id string
 			lowerName := strings.ToLower(name)
@@ -53,11 +53,11 @@ func commandListStreams(streams map[string]map[string]string) {
 }
 
 // Print out the log messages that match the search criteria.
-func commandListMessages(options *options) []logMessage {
-	messages := fetchMessages(options)
-	streams := fetchStreams(options)
+func commandListMessages(opts *options) []logMessage {
+	messages := fetchMessages(opts)
+	streams := fetchStreams(opts)
 	for _, msg := range messages {
-		printMessage(options, streams, msg)
+		printMessage(opts, streams, msg)
 	}
 
 	return messages

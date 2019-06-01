@@ -40,13 +40,13 @@ type logMessage struct {
 }
 
 // Fetch all messages that match the settings in the options.
-func fetchMessages(options *options) []logMessage {
-	api, export := messageApiUri(options)
+func fetchMessages(opts *options) []logMessage {
+	api, export := messageApiUri(opts)
 	var result []logMessage
 	if export {
-		callGraylog(options, api, csvAcceptType)
+		callGraylog(opts, api, csvAcceptType)
 	} else {
-		jsonBytes := callGraylog(options, api, jsonAcceptType)
+		jsonBytes := callGraylog(opts, api, jsonAcceptType)
 		messages := getJsonArray(jsonBytes, "messages")
 		_, _ = jsonparser.ArrayEach(messages, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			msg := getJsonSimpleMap(value, "message")
@@ -73,7 +73,7 @@ func fetchMessages(options *options) []logMessage {
 			return result[i].timestamp.Before(result[j].timestamp)
 		})
 
-		if options.limit > 0 {
+		if opts.limit > 0 {
 			var filteredMessages []logMessage
 			for _, log := range result {
 				if !msgCache.Contains(log.id) {
@@ -89,34 +89,34 @@ func fetchMessages(options *options) []logMessage {
 }
 
 // Compute the API Uri to call. Determined by examing the command-line options.
-func messageApiUri(options *options) (string, bool) {
+func messageApiUri(opts *options) (string, bool) {
 	var uri string
 	var export bool
 
-	if options.startDate == nil || options.endDate == nil {
-		uri = fmt.Sprintf(relativeSearch, strconv.Itoa(options.timeRange))
+	if opts.startDate == nil || opts.endDate == nil {
+		uri = fmt.Sprintf(relativeSearch, strconv.Itoa(opts.timeRange))
 	} else {
 		uri = fmt.Sprintf(absoluteSearch,
-			url.QueryEscape((*options.startDate).Format(graylogInputTimeFormat)),
-			url.QueryEscape((*options.endDate).Format(graylogInputTimeFormat)),
+			url.QueryEscape((*opts.startDate).Format(graylogInputTimeFormat)),
+			url.QueryEscape((*opts.endDate).Format(graylogInputTimeFormat)),
 		)
-		if len(options.fields) > 0 {
+		if len(opts.fields) > 0 {
 			export = true
-			uri += "&fields=" + url.QueryEscape(options.fields)
+			uri += "&fields=" + url.QueryEscape(opts.fields)
 		}
 	}
-	if options.limit > 0 && !export {
-		uri += "&limit=" + strconv.Itoa(options.limit)
+	if opts.limit > 0 && !export {
+		uri += "&limit=" + strconv.Itoa(opts.limit)
 	}
-	if len(options.query) > 0 {
-		uri += "&query=" + url.QueryEscape(options.query)
+	if len(opts.query) > 0 {
+		uri += "&query=" + url.QueryEscape(opts.query)
 	} else {
 		uri += "&query=*"
 	}
 
-	if len(options.streamIds) > 0 {
+	if len(opts.streamIds) > 0 {
 		var searchTerm string
-		for i, id := range options.streamIds {
+		for i, id := range opts.streamIds {
 			if i > 0 {
 				searchTerm += " OR "
 			}
@@ -129,12 +129,12 @@ func messageApiUri(options *options) (string, bool) {
 }
 
 // Fetch the list of streams defined in Graylog.
-func fetchStreams(options *options) map[string]map[string]string {
+func fetchStreams(opts *options) map[string]map[string]string {
 	if len(streamCache) > 0 {
 		return streamCache
 	}
 
-	json := callGraylog(options, streamsInfo, jsonAcceptType)
+	json := callGraylog(opts, streamsInfo, jsonAcceptType)
 
 	enabledStreams := make(map[string]map[string]string)
 
@@ -161,8 +161,8 @@ func fetchStreams(options *options) map[string]map[string]string {
 }
 
 // Common entry-point for calls to Graylog.
-func callGraylog(options *options, api string, acceptType string) []byte {
-	cfg := options.serverConfig
+func callGraylog(opts *options, api string, acceptType string) []byte {
+	cfg := opts.serverConfig
 
 	uri := cfg.Uri()
 	username := cfg.Username()

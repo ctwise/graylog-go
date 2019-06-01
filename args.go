@@ -93,7 +93,7 @@ func parseArgs() *options {
 		query = &newQuery
 	}
 
-	options := options{
+	opts := options{
 		listStreams: *listStreams,
 		application: *application,
 		query:       *query,
@@ -109,22 +109,22 @@ func parseArgs() *options {
 	}
 
 	// Read the configuration file
-	cfg, err := config.New(options.configPath)
+	cfg, err := config.New(opts.configPath)
 	if err != nil {
 		invalidArgs(parser, err, "")
 	}
 
-	options.serverConfig = cfg
+	opts.serverConfig = cfg
 
 	// Convert the stream names into Graylog stream ids
 	if len(*streamNames) > 0 {
-		options.streamIds = findStreamIds(&options, *streamNames)
-		if options.streamIds == nil {
+		opts.streamIds = findStreamIds(&opts, *streamNames)
+		if opts.streamIds == nil {
 			invalidArgs(parser, nil, "Invalid stream name(s)")
 		}
 	}
 
-	return &options
+	return &opts
 }
 
 // Convert a variable human-friendly date into a time.Time.
