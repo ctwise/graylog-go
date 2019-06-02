@@ -147,16 +147,14 @@ func strToDate(parser *argparse.Parser, dateStr string, errorStr string, default
 		}
 		if err != nil {
 			return nil
-		} else {
-			return &dateTime
 		}
+		return &dateTime
 	}
 	if defaultToNow {
 		dateTime = time.Now()
 		return &dateTime
-	} else {
-		return nil
 	}
+	return nil
 }
 
 // Converts a simple human-friendly time range into seconds, e.g., 2h for 2 hours, 3d2h30m for 3 days, 2 hours and

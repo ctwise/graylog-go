@@ -73,9 +73,8 @@ func tryFormat(msg logMessage, tmplName string, tmpl string) string {
 
 	if err := t.Execute(&result, msg.fields); err == nil {
 		return result.String()
-	} else {
-		return ""
 	}
+	return ""
 }
 
 // Convert a timestamp to a long time string.
@@ -117,8 +116,8 @@ func adjustMessage(msg logMessage, streamLookup map[string]map[string]string, is
 
 	if len(msg.streams) > 0 {
 		var streamNames []string
-		for _, streamId := range msg.streams {
-			streamTitle := streamLookup[streamId]["title"]
+		for _, streamID := range msg.streams {
+			streamTitle := streamLookup[streamID]["title"]
 			streamNames = append(streamNames, streamTitle)
 		}
 		streamDisplay := strings.Join(streamNames, " ")

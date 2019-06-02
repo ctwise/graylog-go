@@ -3,8 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/buger/jsonparser"
-	"github.com/hashicorp/golang-lru"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -12,6 +10,9 @@ import (
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/buger/jsonparser"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 const jsonAcceptType = "application/json"
@@ -41,14 +42,14 @@ type logMessage struct {
 
 // Fetch all messages that match the settings in the options.
 func fetchMessages(opts *options) (result []logMessage) {
-	api, export := messageApiUri(opts)
+	api, export := messageAPIURI(opts)
 	if export {
 		callGraylog(opts, api, csvAcceptType)
 	} else {
 		jsonBytes := callGraylog(opts, api, jsonAcceptType)
-		messages := getJsonArray(jsonBytes, "messages")
+		messages := getJSONArray(jsonBytes, "messages")
 		_, _ = jsonparser.ArrayEach(messages, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			msg := getJsonSimpleMap(value, "message")
+			msg := getJSONSimpleMap(value, "message")
 			tsStr := msg[timestampField]
 			// Mon Jan 2 15:04:05 -0700 MST 2006
 
@@ -57,7 +58,7 @@ func fetchMessages(opts *options) (result []logMessage) {
 				fmt.Fprintf(os.Stderr, "Invalid json timestamp: %s - %s\n", tsStr, err.Error())
 			}
 			if err == nil {
-				streams := getJsonArrayOfStrings(value, "message", "streams")
+				streams := getJSONArrayOfStrings(value, "message", "streams")
 
 				msgObj := logMessage{
 					id:        string(msg["_id"]),
@@ -88,7 +89,7 @@ func fetchMessages(opts *options) (result []logMessage) {
 }
 
 // Compute the API Uri to call. Determined by examing the command-line options.
-func messageApiUri(opts *options) (uri string, export bool) {
+func messageAPIURI(opts *options) (uri string, export bool) {
 	if opts.startDate == nil || opts.endDate == nil {
 		uri = fmt.Sprintf(relativeSearch, strconv.Itoa(opts.timeRange))
 	} else {
@@ -134,17 +135,17 @@ func fetchStreams(opts *options) map[string]map[string]string {
 
 	enabledStreams := make(map[string]map[string]string)
 
-	slice := getJsonArray(json, "streams")
+	slice := getJSONArray(json, "streams")
 	if len(slice) > 0 {
 		_, _ = jsonparser.ArrayEach(slice, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Unable to read array entry: %s\n", err.Error())
 			} else {
-				disabled := getJsonBool(value, "disabled")
-				id := getJsonString(value, "id")
+				disabled := getJSONBool(value, "disabled")
+				id := getJSONString(value, "id")
 
 				if !disabled {
-					enabledStreams[id] = getJsonSimpleMap(value)
+					enabledStreams[id] = getJSONSimpleMap(value)
 				}
 
 			}
