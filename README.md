@@ -31,7 +31,7 @@ Arguments:
   -s  --stream        The name of the stream(s) to display messages from.
                       Default: all streams.
   -t  --tail          Whether to tail the output. Requires a relative search.
-  -c  --config        Path to the config file. Default: /Users/ctwise/.graylog
+  -c  --config        Path to the config file. Default: <home>/.graylog
   -r  --range         Time range to search backwards from the current moment.
                       Examples: 30m, 2h, 4d. Default: 2h
       --start         Starting time to search from. Allows variable formats,
