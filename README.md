@@ -2,7 +2,7 @@
 
 Command-line interface to search and interrogate a Graylog instance. Very useful for searching and tailing logs from the command-line.
 
-Originally came from https://github.com/bvargo/gtail. I converted it first to Python, then Go.
+Originally came from https://github.com/bvargo/gtail. I converted it first to Python 3, then Go.
 
 ```text
 usage: graylog [-h|--help] [--list-streams] [-a|--application "<value>"]
