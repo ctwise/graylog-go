@@ -52,12 +52,15 @@ func commandListStreams(streams map[string]map[string]string) {
 }
 
 // Print out the log messages that match the search criteria.
-func commandListMessages(opts *options) []logMessage {
+func commandListMessages(opts *options) ([]logMessage, map[string]map[string]string) {
 	messages := fetchMessages(opts)
 	streams := fetchStreams(opts)
+
+	return messages, streams
+}
+
+func printMessages(messages []logMessage, opts *options, streams map[string]map[string]string) {
 	for _, msg := range messages {
 		printMessage(opts, streams, msg)
 	}
-
-	return messages
 }

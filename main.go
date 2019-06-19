@@ -1,7 +1,10 @@
 package main
 
 import (
+	"github.com/briandowns/spinner"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -30,10 +33,31 @@ func adjustDelay(delay float64, messages []logMessage) float64 {
 	return delay
 }
 
-// Simple sleep function that uses a delay in seconds.
-func sleep(delay float64) {
+func delayForSeconds(delay float64) {
 	delayInMilliseconds := int(delay * 1000.0)
 	time.Sleep(time.Duration(delayInMilliseconds) * time.Millisecond)
+}
+
+func setupSpinner() *spinner.Spinner {
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	s.UpdateCharSet(spinner.CharSets[21]) // box of dots
+	s.Writer = os.Stderr
+	s.HideCursor = true
+	s.Color("red", "bold")
+	return s
+}
+
+func makeSignalsChannel() chan os.Signal {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c,
+		// https://www.gnu.org/software/libc/manual/html_node/Termination-Signals.html
+		syscall.SIGTERM, // "the normal way to politely ask a program to terminate"
+		syscall.SIGINT,  // Ctrl+C
+		syscall.SIGQUIT, // Ctrl-\
+		syscall.SIGKILL, // "always fatal", "SIGKILL and SIGSTOP may not be caught by a program"
+		syscall.SIGHUP,  // "terminal is disconnected"
+	)
+	return c
 }
 
 func main() {
@@ -46,15 +70,34 @@ func main() {
 	}
 
 	if !opts.tail {
-		commandListMessages(opts)
+		messages, streams := commandListMessages(opts)
+		printMessages(messages, opts, streams)
 	} else {
 		var delay = minDelay
 
+		s := setupSpinner()
+		s.Start()
+
+		exitChan := makeSignalsChannel()
+
+		// Handle exit signals - only needed when tailing
+		go func() {
+			for _ = range exitChan {
+				s.Stop()
+				os.Exit(0)
+			}
+		}()
+
 		//noinspection GoInfiniteFor
 		for {
-			messages := commandListMessages(opts)
+			messages, streams := commandListMessages(opts)
+			if len(messages) > 0 {
+				s.Stop()
+				printMessages(messages, opts, streams)
+				s.Start()
+			}
 
-			sleep(delay)
+			delayForSeconds(delay)
 
 			delay = adjustDelay(delay, messages)
 		}
